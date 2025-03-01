@@ -3,6 +3,7 @@ import 'package:lacatory_workers/dashboard.dart';
 import 'package:lacatory_workers/login_page.dart';
 import 'package:lacatory_workers/order_details_screen.dart';
 import 'package:lacatory_workers/order_management.dart';
+import 'package:lacatory_workers/profile_screen.dart';
 import 'package:lacatory_workers/services_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     super.initState();
   }
 
@@ -67,6 +68,15 @@ class _HomeScreenState extends State<HomeScreen>
                     setState(() {});
                   },
                 ),
+                DrawerItemButton(
+                  inverse: _tabController.index == 3,
+                  iconData: Icons.account_circle_outlined,
+                  label: 'Profile',
+                  onTap: () {
+                    _tabController.animateTo(3);
+                    setState(() {});
+                  },
+                ),
 
                 Spacer(),
                 DrawerItemButton(
@@ -92,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen>
                 DashboardScreen(),
                 OrderManagementScreen(),
                 LaundryServicesScreen(),
+                WorkerProfileScreen(),
               ],
             ),
           ),
