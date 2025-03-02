@@ -34,6 +34,8 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
     'Dry Cleaning',
     'Ironing',
     'Special Items',
+    'Shoe Cleaning',
+    'Carpet Cleaning',
   ];
 
   // Sample data for laundry services
