@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+String formatDate(String date) {
+  final DateTime parsedDate = DateTime.parse(date);
+  final DateFormat formatter = DateFormat('MMM d, yyyy, h:mm a');
+  return formatter.format(parsedDate);
+}
 
 class OrderDetailsScreen extends StatelessWidget {
-  const OrderDetailsScreen({super.key});
+  final Map orderDetails;
+  const OrderDetailsScreen({super.key, required this.orderDetails});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Order Details - #ORD-8945',
+          'Order Details - #${orderDetails['id']}',
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -62,16 +70,14 @@ class OrderDetailsScreen extends StatelessWidget {
                                   ),
                                   Divider(),
                                   SizedBox(height: 8),
-                                  InfoRow('Name:', 'John Smith'),
+                                  InfoRow('Name:',
+                                      orderDetails['customers']['name']),
                                   SizedBox(height: 8),
-                                  InfoRow('Phone:', '(555) 123-4567'),
+                                  InfoRow('Phone:',
+                                      orderDetails['customers']['phone']),
                                   SizedBox(height: 8),
-                                  InfoRow('Email:', 'john.smith@example.com'),
-                                  SizedBox(height: 8),
-                                  InfoRow(
-                                    'Address:',
-                                    '123 Main St, Apt 4B\nCityville, ST 12345',
-                                  ),
+                                  InfoRow('Email:',
+                                      orderDetails['customers']['email']),
                                 ],
                               ),
                             ),
@@ -91,11 +97,58 @@ class OrderDetailsScreen extends StatelessWidget {
                                   ),
                                   Divider(),
                                   SizedBox(height: 8),
-                                  InfoRow('Order ID:', '#ORD-8945'),
+                                  InfoRow(
+                                      'Order ID:', '#${orderDetails['id']}'),
                                   SizedBox(height: 8),
-                                  InfoRow('Date:', 'Feb 28, 2025, 10:30 AM'),
+                                  InfoRow(
+                                      'Date:',
+                                      formatDate(orderDetails['created_at']
+                                          .toString())),
                                   SizedBox(height: 8),
-                                  InfoRow('Service:', 'Wash & Fold'),
+                                  Text(
+                                    'Order Items',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2C3E50),
+                                    ),
+                                  ),
+                                  Divider(),
+                                  Column(
+                                    children: List.generate(
+                                        orderDetails['laundry_items'].length,
+                                        (index) {
+                                      final item =
+                                          orderDetails['laundry_items'][index];
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                item['laundry_services']
+                                                    ['name'],
+                                                style: TextStyle(
+                                                  color: Colors.grey[800],
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              item['price'].toString(),
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                                  ),
                                   SizedBox(height: 8),
                                   Row(
                                     crossAxisAlignment:
@@ -123,7 +176,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                           ),
                                         ),
                                         child: Text(
-                                          'Pending',
+                                          orderDetails['status'],
                                           style: TextStyle(
                                             color: Colors.amber[800],
                                             fontWeight: FontWeight.w600,

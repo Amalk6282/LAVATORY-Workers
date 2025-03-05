@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lacatory_workers/order_details_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Order {
   final String id;
@@ -10,6 +11,7 @@ class Order {
   final String deliveryDate;
   final double amount;
   final String status;
+  final Map orderDetails;
 
   Order({
     required this.id,
@@ -20,6 +22,7 @@ class Order {
     required this.deliveryDate,
     required this.amount,
     required this.status,
+    required this.orderDetails,
   });
 }
 
@@ -36,28 +39,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   String _selectedFilter = 'All Statuses';
   int _currentPage = 1;
 
-  List<Order> _orders = [
-    Order(
-      id: '#ORD-8945',
-      customer: 'John Smith',
-      services: 'Wash & Fold',
-      items: 8,
-      orderDate: 'Feb 28, 2025',
-      deliveryDate: 'Mar 1, 2025',
-      amount: 24.50,
-      status: 'Pending',
-    ),
-    Order(
-      id: '#ORD-8944',
-      customer: 'Sarah Johnson',
-      services: 'Dry Cleaning',
-      items: 4,
-      orderDate: 'Feb 28, 2025',
-      deliveryDate: 'Mar 2, 2025',
-      amount: 35.75,
-      status: 'Process',
-    ),
-  ];
+  List<Order> _orders = [];
 
   List<Order> get filteredOrders {
     if (_selectedFilter == 'Today') {
@@ -67,6 +49,36 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     } else {
       return _orders;
     }
+  }
+
+  @override
+  void initState() {
+    Supabase.instance.client
+        .from('laundry_orders')
+        .select('*, laundry_items(*, laundry_services(*)), customers(*)')
+        .eq('status', widget.status)
+        .then((response) {
+      List<Order> orders = [];
+
+      for (var row in response) {
+        orders.add(Order(
+          id: row['id'].toString(),
+          customer: row['customers']['name'].toString(),
+          services: '',
+          items: row['laundry_items'].length,
+          orderDate: row['created_at'].toString(),
+          deliveryDate: row['created_at'].toString(),
+          amount: row['total'],
+          status: row['status'].toString(),
+          orderDetails: row,
+        ));
+      }
+
+      setState(() {
+        _orders = orders;
+      });
+    });
+    super.initState();
   }
 
   @override
@@ -171,16 +183,16 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Services',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
+          // Expanded(
+          //   flex: 2,
+          //   child: Text(
+          //     'Services',
+          //     style: TextStyle(
+          //       fontWeight: FontWeight.bold,
+          //       color: Colors.grey[700],
+          //     ),
+          //   ),
+          // ),
           Expanded(
             child: Text(
               'Items',
@@ -200,16 +212,16 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Delivery Date',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
+          // Expanded(
+          //   flex: 2,
+          //   child: Text(
+          //     'Delivery Date',
+          //     style: TextStyle(
+          //       fontWeight: FontWeight.bold,
+          //       color: Colors.grey[700],
+          //     ),
+          //   ),
+          // ),
           Expanded(
             flex: 2,
             child: Text(
@@ -264,13 +276,13 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
               style: TextStyle(color: Colors.grey[700]),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              order.services,
-              style: TextStyle(color: Colors.grey[700]),
-            ),
-          ),
+          // Expanded(
+          //   flex: 2,
+          //   child: Text(
+          //     order.services,
+          //     style: TextStyle(color: Colors.grey[700]),
+          //   ),
+          // ),
           Expanded(
             child: Text(
               order.items.toString(),
@@ -284,13 +296,13 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
               style: TextStyle(color: Colors.grey[700]),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              order.deliveryDate,
-              style: TextStyle(color: Colors.grey[700]),
-            ),
-          ),
+          // Expanded(
+          //   flex: 2,
+          //   child: Text(
+          //     order.deliveryDate,
+          //     style: TextStyle(color: Colors.grey[700]),
+          //   ),
+          // ),
           Expanded(
             flex: 2,
             child: Text(
@@ -303,36 +315,39 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
             flex: 2,
             child: Row(
               children: [
-                if (status == 'Pending')
+                if (order.status == 'Pending')
                   TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => OrderDetailsScreen()),
-                      );
+                    onPressed: () async {
+                      await Supabase.instance.client
+                          .from('laundry_orders')
+                          .update({'status': 'Active'}).eq(
+                              'id', int.parse(order.id));
+                      setState(() {});
                     },
                     child: Text('Active', style: TextStyle(color: Colors.blue)),
                   ),
-                if (status == 'Active')
+                if (order.status == 'Active')
                   TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => OrderDetailsScreen()),
-                      );
+                    onPressed: () async {
+                      await Supabase.instance.client
+                          .from('laundry_orders')
+                          .update({'status': 'Completed'}).eq(
+                              'id', int.parse(order.id));
+                      setState(() {});
                     },
                     child:
                         Text('Complete', style: TextStyle(color: Colors.blue)),
                   ),
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => OrderDetailsScreen()),
+                          builder: (context) => OrderDetailsScreen(
+                                orderDetails: order.orderDetails,
+                              )),
                     );
+                    setState(() {});
                   },
                   child: Text('View', style: TextStyle(color: Colors.blue)),
                 ),
