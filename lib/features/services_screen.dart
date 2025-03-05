@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'add_edit_service.dart';
+
 class LaundryService {
   String id;
   String name;
@@ -91,17 +93,15 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
     }
 
     return _services.where((service) {
-      bool matchesSearch =
-          _searchController.text.isEmpty ||
+      bool matchesSearch = _searchController.text.isEmpty ||
           service.name.toLowerCase().contains(
-            _searchController.text.toLowerCase(),
-          ) ||
+                _searchController.text.toLowerCase(),
+              ) ||
           service.description.toLowerCase().contains(
-            _searchController.text.toLowerCase(),
-          );
+                _searchController.text.toLowerCase(),
+              );
 
-      bool matchesCategory =
-          _selectedCategory == 'All Categories' ||
+      bool matchesCategory = _selectedCategory == 'All Categories' ||
           service.category == _selectedCategory;
 
       return matchesSearch && matchesCategory;
@@ -123,18 +123,9 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
           children: [
             _buildTopBar(),
             SizedBox(height: 16),
-            _buildFilters(),
-            SizedBox(height: 16),
             _buildServicesList(),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showServiceDialog();
-        },
-        backgroundColor: Color(0xFF3498DB),
-        child: Icon(Icons.add),
       ),
     );
   }
@@ -147,26 +138,29 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         Spacer(),
-        OutlinedButton.icon(
-          icon: Icon(Icons.file_download),
-          label: Text('Export'),
-          onPressed: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Services list exported')));
-          },
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Color(0xFF2C3E50),
-            side: BorderSide(color: Color(0xFF2C3E50)),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
-        ),
+        // OutlinedButton.icon(
+        //   icon: Icon(Icons.file_download),
+        //   label: Text('Export'),
+        //   onPressed: () {
+        //     ScaffoldMessenger.of(
+        //       context,
+        //     ).showSnackBar(SnackBar(content: Text('Services list exported')));
+        //   },
+        //   style: OutlinedButton.styleFrom(
+        //     foregroundColor: Color(0xFF2C3E50),
+        //     side: BorderSide(color: Color(0xFF2C3E50)),
+        //     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        //   ),
+        // ),
         SizedBox(width: 12),
         ElevatedButton.icon(
           icon: Icon(Icons.add),
           label: Text('Add Service'),
           onPressed: () {
-            _showServiceDialog();
+            showDialog(
+              context: context,
+              builder: (context) => AddEditService(),
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Color(0xFF3498DB),
@@ -225,13 +219,12 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                 value: _selectedCategory,
                 isExpanded: true,
                 hint: Text('Category'),
-                items:
-                    _categories.map((category) {
-                      return DropdownMenuItem<String>(
-                        value: category,
-                        child: Text(category),
-                      );
-                    }).toList(),
+                items: _categories.map((category) {
+                  return DropdownMenuItem<String>(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
                 onChanged: (value) {
                   setState(() {
                     _selectedCategory = value!;
@@ -247,21 +240,20 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
 
   Widget _buildServicesList() {
     return Expanded(
-      child:
-          filteredServices.isEmpty
-              ? Center(
-                child: Text(
-                  'No services found',
-                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                ),
-              )
-              : ListView.builder(
-                itemCount: filteredServices.length,
-                itemBuilder: (context, index) {
-                  final service = filteredServices[index];
-                  return _buildServiceCard(service);
-                },
+      child: filteredServices.isEmpty
+          ? Center(
+              child: Text(
+                'No services found',
+                style: TextStyle(fontSize: 18, color: Colors.grey[600]),
               ),
+            )
+          : ListView.builder(
+              itemCount: filteredServices.length,
+              itemBuilder: (context, index) {
+                final service = filteredServices[index];
+                return _buildServiceCard(service);
+              },
+            ),
     );
   }
 
@@ -324,32 +316,31 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                 Spacer(),
                 PopupMenuButton(
                   icon: Icon(Icons.more_vert),
-                  itemBuilder:
-                      (context) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, size: 18),
-                              SizedBox(width: 8),
-                              Text('Edit'),
-                            ],
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 18),
+                          SizedBox(width: 8),
+                          Text('Edit'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 18, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: Colors.red),
                           ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, size: 18, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                  ],
                   onSelected: (value) {
                     if (value == 'edit') {
                       _showServiceDialog(service: service);
@@ -478,13 +469,13 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                       ),
                       items:
                           _categories.where((c) => c != 'All Categories').map((
-                            category,
-                          ) {
-                            return DropdownMenuItem<String>(
-                              value: category,
-                              child: Text(category),
-                            );
-                          }).toList(),
+                        category,
+                      ) {
+                        return DropdownMenuItem<String>(
+                          value: category,
+                          child: Text(category),
+                        );
+                      }).toList(),
                       onChanged: (value) {
                         setState(() {
                           selectedCategory = value!;
@@ -616,25 +607,4 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
   void _refreshUI() {
     setState(() {});
   }
-}
-
-// Add this screen to your main app
-class LaundryServiceApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Laundry Services',
-      theme: ThemeData(
-        primaryColor: Color(0xFF2C3E50),
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: Color(0xFF3498DB),
-        ),
-      ),
-      home: LaundryServicesScreen(),
-    );
-  }
-}
-
-void main() {
-  runApp(LaundryServiceApp());
 }

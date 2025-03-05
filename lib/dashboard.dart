@@ -1,25 +1,7 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const LaundryServiceApp());
-}
-
-class LaundryServiceApp extends StatelessWidget {
-  const LaundryServiceApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Laundry Service Dashboard',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const DashboardScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,20 +27,13 @@ class DashboardScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(16.0),
               color: Colors.grey[100],
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Status cards row
-                    buildStatusCardsRow(),
-                    const SizedBox(height: 20),
-                    // Action buttons row
-                    buildActionButtonsRow(context),
-                    const SizedBox(height: 20),
-                    // Recent orders
-                    buildRecentOrdersSection(context),
-                  ],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Status cards row
+                  buildStatusCardsRow(),
+                ],
               ),
             ),
           ),
@@ -341,10 +316,9 @@ class DashboardScreen extends StatelessWidget {
                 status,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color:
-                      status == 'Pending'
-                          ? Colors.amber[800]
-                          : status == 'Processing'
+                  color: status == 'Pending'
+                      ? Colors.amber[800]
+                      : status == 'Processing'
                           ? Colors.green[800]
                           : Colors.blue[800],
                   fontSize: 12,
@@ -355,16 +329,15 @@ class DashboardScreen extends StatelessWidget {
           Expanded(
             flex: 1,
             child: TextButton(
-              onPressed:
-                  () => showOrderDetailsDialog(
-                    context,
-                    orderId,
-                    customer,
-                    service,
-                    date,
-                    amount,
-                    status,
-                  ),
+              onPressed: () => showOrderDetailsDialog(
+                context,
+                orderId,
+                customer,
+                service,
+                date,
+                amount,
+                status,
+              ),
               child: const Text('View', style: TextStyle(color: Colors.blue)),
             ),
           ),

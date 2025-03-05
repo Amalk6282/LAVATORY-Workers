@@ -1,43 +1,28 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: OrderDetailsScreen(),
-    );
-  }
-}
-
 class OrderDetailsScreen extends StatelessWidget {
+  const OrderDetailsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Order Details - #ORD-8945',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Color(0xFF2C3E50),
+      ),
       body: SafeArea(
         child: Container(
           color: Colors.grey[100],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                color: Color(0xFF2C3E50),
-                child: Text(
-                  'Order Details - #ORD-8945',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-
               // Content area
               Expanded(
                 child: Container(
@@ -156,58 +141,58 @@ class OrderDetailsScreen extends StatelessWidget {
 
                       Spacer(),
 
-                      // Action Buttons
-                      Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                ),
-                                child: Text(
-                                  'Accept Order',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                ),
-                                child: Text(
-                                  'Reject Order',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey,
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                ),
-                                child: Text(
-                                  'Contact Customer',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // // Action Buttons
+                      // Padding(
+                      //   padding: EdgeInsets.all(16),
+                      //   child: Row(
+                      //     children: [
+                      //       Expanded(
+                      //         child: ElevatedButton(
+                      //           onPressed: () {},
+                      //           style: ElevatedButton.styleFrom(
+                      //             backgroundColor: Colors.blue,
+                      //             foregroundColor: Colors.white,
+                      //             padding: EdgeInsets.symmetric(vertical: 16),
+                      //           ),
+                      //           child: Text(
+                      //             'Accept Order',
+                      //             style: TextStyle(fontSize: 16),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //       SizedBox(width: 8),
+                      //       Expanded(
+                      //         child: ElevatedButton(
+                      //           onPressed: () {},
+                      //           style: ElevatedButton.styleFrom(
+                      //             backgroundColor: Colors.red,
+                      //             foregroundColor: Colors.white,
+                      //             padding: EdgeInsets.symmetric(vertical: 16),
+                      //           ),
+                      //           child: Text(
+                      //             'Reject Order',
+                      //             style: TextStyle(fontSize: 16),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //       SizedBox(width: 8),
+                      //       Expanded(
+                      //         child: ElevatedButton(
+                      //           onPressed: () {},
+                      //           style: ElevatedButton.styleFrom(
+                      //             backgroundColor: Colors.grey,
+                      //             foregroundColor: Colors.white,
+                      //             padding: EdgeInsets.symmetric(vertical: 16),
+                      //           ),
+                      //           child: Text(
+                      //             'Contact Customer',
+                      //             style: TextStyle(fontSize: 16),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
@@ -224,7 +209,7 @@ class InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  InfoRow(this.label, this.value);
+  InfoRow(this.label, this.value, {super.key});
 
   @override
   Widget build(BuildContext context) {

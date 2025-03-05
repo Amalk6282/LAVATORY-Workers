@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lacatory_workers/dashboard.dart';
-import 'package:lacatory_workers/login_page.dart';
-import 'package:lacatory_workers/order_details_screen.dart';
+import 'package:lacatory_workers/features/login/login_screen.dart';
 import 'package:lacatory_workers/order_management.dart';
 import 'package:lacatory_workers/profile_screen.dart';
-import 'package:lacatory_workers/services_screen.dart';
+import 'package:lacatory_workers/features/services_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../common_widgets.dart/custom_alert_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void initState() {
-    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 5, vsync: this, initialIndex: 0);
     super.initState();
   }
 
@@ -53,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen>
                 DrawerItemButton(
                   inverse: _tabController.index == 1,
                   iconData: Icons.book_online_outlined,
-                  label: 'Order Details',
+                  label: 'Pending Order',
                   onTap: () {
                     _tabController.animateTo(1);
                     setState(() {});
@@ -61,8 +63,8 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 DrawerItemButton(
                   inverse: _tabController.index == 2,
-                  iconData: Icons.home_repair_service_outlined,
-                  label: 'Laundry Services',
+                  iconData: Icons.book_online_outlined,
+                  label: 'Active Orders',
                   onTap: () {
                     _tabController.animateTo(2);
                     setState(() {});
@@ -70,21 +72,54 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 DrawerItemButton(
                   inverse: _tabController.index == 3,
-                  iconData: Icons.account_circle_outlined,
-                  label: 'Profile',
+                  iconData: Icons.book_online_outlined,
+                  label: 'Completed Orders',
                   onTap: () {
                     _tabController.animateTo(3);
                     setState(() {});
                   },
                 ),
-
+                DrawerItemButton(
+                  inverse: _tabController.index == 4,
+                  iconData: Icons.home_repair_service_outlined,
+                  label: 'Laundry Services',
+                  onTap: () {
+                    _tabController.animateTo(4);
+                    setState(() {});
+                  },
+                ),
+                // DrawerItemButton(
+                //   inverse: _tabController.index == 3,
+                //   iconData: Icons.account_circle_outlined,
+                //   label: 'Profile',
+                //   onTap: () {
+                //     _tabController.animateTo(3);
+                //     setState(() {});
+                //   },
+                // ),
                 Spacer(),
                 DrawerItemButton(
                   inverse: false,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    showDialog(
+                      context: context,
+                      builder: (context) => CustomAlertDialog(
+                        title: "LOG OUT",
+                        content: const Text(
+                          "Are you sure you want to log out? Clicking 'Logout' will end your current session and require you to Login again to access your account.",
+                        ),
+                        primaryButton: "LOG OUT",
+                        onPrimaryPressed: () {
+                          Supabase.instance.client.auth.signOut();
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                      ),
                     );
                   },
                   iconData: Icons.logout,
@@ -100,9 +135,16 @@ class _HomeScreenState extends State<HomeScreen>
               controller: _tabController,
               children: [
                 DashboardScreen(),
-                OrderManagementScreen(),
+                OrderManagementScreen(
+                  status: 'Pending',
+                ),
+                OrderManagementScreen(
+                  status: 'Active',
+                ),
+                OrderManagementScreen(
+                  status: 'Completed',
+                ),
                 LaundryServicesScreen(),
-                WorkerProfileScreen(),
               ],
             ),
           ),

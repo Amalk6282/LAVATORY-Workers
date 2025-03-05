@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lacatory_workers/login_page.dart';
+import 'package:lacatory_workers/features/login/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void checkLogin(BuildContext context) {
@@ -11,7 +11,7 @@ void checkLogin(BuildContext context) {
     if (!(currentUser != null)) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const LoginPage(),
+          builder: (context) => const LoginScreen(),
         ),
       );
     }

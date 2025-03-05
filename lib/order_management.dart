@@ -1,26 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lacatory_workers/order_details_screen.dart';
 
-void main() {
-  runApp(OrderManagementApp());
-}
-
-class OrderManagementApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Order Management',
-      theme: ThemeData(
-        primaryColor: Color(0xFF2C3E50),
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: Color(0xFF3498DB),
-        ),
-      ),
-      home: OrderManagementScreen(),
-    );
-  }
-}
-
 class Order {
   final String id;
   final String customer;
@@ -44,6 +24,9 @@ class Order {
 }
 
 class OrderManagementScreen extends StatefulWidget {
+  final String status;
+  const OrderManagementScreen({super.key, required this.status});
+
   @override
   _OrderManagementScreenState createState() => _OrderManagementScreenState();
 }
@@ -98,11 +81,11 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
             children: [
               _buildHeader(),
               SizedBox(height: 16),
-              _buildFilters(),
-              SizedBox(height: 16),
-              _buildOrdersTable(),
-              SizedBox(height: 16),
-              _buildPagination(),
+              _buildOrdersTable(
+                status: widget.status,
+              ),
+              // SizedBox(height: 16),
+              // _buildPagination(),
             ],
           ),
         ),
@@ -123,7 +106,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
       child: Row(
         children: [
           Text(
-            'Order Management',
+            '${widget.status} Order Management',
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -135,89 +118,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     );
   }
 
-  Widget _buildFilters() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.search, color: Colors.blue),
-                SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search orders...',
-                      border: InputBorder.none,
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(width: 16),
-        _buildFilterButton('All Statuses'),
-        SizedBox(width: 16),
-        _buildFilterButton('Today'),
-        SizedBox(width: 16),
-        ElevatedButton.icon(
-          icon: Icon(Icons.add),
-          label: Text('New Order'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF3498DB),
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          ),
-          onPressed: () {
-            _showNewOrderDialog();
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterButton(String text) {
-    bool isSelected = _selectedFilter == text;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedFilter = text;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Color(0xFF3498DB) : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isSelected ? Color(0xFF3498DB) : Colors.grey[700],
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrdersTable() {
+  Widget _buildOrdersTable({required String status}) {
     return Expanded(
       child: Container(
         decoration: BoxDecoration(
@@ -232,7 +133,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
               child: ListView.builder(
                 itemCount: filteredOrders.length,
                 itemBuilder: (context, index) {
-                  return _buildOrderRow(filteredOrders[index]);
+                  return _buildOrderRow(filteredOrders[index], status: status);
                 },
               ),
             ),
@@ -344,7 +245,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     );
   }
 
-  Widget _buildOrderRow(Order order) {
+  Widget _buildOrderRow(Order order, {required String status}) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
@@ -400,14 +301,42 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
           Expanded(flex: 2, child: _buildStatusBadge(order.status)),
           Expanded(
             flex: 2,
-            child: TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => OrderDetailsScreen()),
-                );
-              },
-              child: Text('View', style: TextStyle(color: Colors.blue)),
+            child: Row(
+              children: [
+                if (status == 'Pending')
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => OrderDetailsScreen()),
+                      );
+                    },
+                    child: Text('Active', style: TextStyle(color: Colors.blue)),
+                  ),
+                if (status == 'Active')
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => OrderDetailsScreen()),
+                      );
+                    },
+                    child:
+                        Text('Complete', style: TextStyle(color: Colors.blue)),
+                  ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => OrderDetailsScreen()),
+                    );
+                  },
+                  child: Text('View', style: TextStyle(color: Colors.blue)),
+                ),
+              ],
             ),
           ),
         ],
@@ -447,246 +376,325 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     );
   }
 
-  Widget _buildPagination() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildPaginationButton('«', _currentPage > 1, () {
-          if (_currentPage > 1) {
-            setState(() {
-              _currentPage--;
-            });
-          }
-        }),
-        _buildPaginationButton('1', _currentPage != 1, () {
-          setState(() {
-            _currentPage = 1;
-          });
-        }, isActive: _currentPage == 1),
-        _buildPaginationButton('2', _currentPage != 2, () {
-          setState(() {
-            _currentPage = 2;
-          });
-        }, isActive: _currentPage == 2),
-        _buildPaginationButton('»', true, () {
-          setState(() {
-            _currentPage = 2;
-          });
-        }),
-      ],
-    );
-  }
+  // Widget _buildFilters() {
+  //   return Row(
+  //     children: [
+  //       Expanded(
+  //         child: Container(
+  //           padding: EdgeInsets.symmetric(horizontal: 16),
+  //           decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: BorderRadius.circular(8),
+  //             border: Border.all(color: Colors.grey[300]!),
+  //           ),
+  //           child: Row(
+  //             children: [
+  //               Icon(Icons.search, color: Colors.blue),
+  //               SizedBox(width: 8),
+  //               Expanded(
+  //                 child: TextField(
+  //                   controller: _searchController,
+  //                   decoration: InputDecoration(
+  //                     hintText: 'Search orders...',
+  //                     border: InputBorder.none,
+  //                   ),
+  //                   onChanged: (value) {
+  //                     setState(() {});
+  //                   },
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //       SizedBox(width: 16),
+  //       _buildFilterButton('All Statuses'),
+  //       SizedBox(width: 16),
+  //       _buildFilterButton('Today'),
+  //       SizedBox(width: 16),
+  //       ElevatedButton.icon(
+  //         icon: Icon(Icons.add),
+  //         label: Text('New Order'),
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: Color(0xFF3498DB),
+  //           foregroundColor: Colors.white,
+  //           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+  //         ),
+  //         onPressed: () {
+  //           _showNewOrderDialog();
+  //         },
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildPaginationButton(
-    String text,
-    bool enabled,
-    VoidCallback onPressed, {
-    bool isActive = false,
-  }) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4),
-      child: InkWell(
-        onTap: enabled ? onPressed : null,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: isActive ? Color(0xFF3498DB) : Colors.white,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(
-                color:
-                    isActive
-                        ? Colors.white
-                        : enabled
-                        ? Colors.grey[800]
-                        : Colors.grey[400],
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildFilterButton(String text) {
+  //   bool isSelected = _selectedFilter == text;
 
-  void _showOrderDetails(Order order) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Order Details'),
-          content: Container(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDetailRow('Order ID', order.id),
-                _buildDetailRow('Customer', order.customer),
-                _buildDetailRow('Services', order.services),
-                _buildDetailRow('Items', order.items.toString()),
-                _buildDetailRow('Order Date', order.orderDate),
-                _buildDetailRow('Delivery Date', order.deliveryDate),
-                _buildDetailRow(
-                  'Amount',
-                  '\$${order.amount.toStringAsFixed(2)}',
-                ),
-                _buildDetailRow('Status', order.status),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Close'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Handle updating order status
-                setState(() {
-                  // Update order status here
-                });
-                Navigator.pop(context);
-              },
-              child: Text('Update Status'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //   return InkWell(
+  //     onTap: () {
+  //       setState(() {
+  //         _selectedFilter = text;
+  //       });
+  //     },
+  //     child: Container(
+  //       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(8),
+  //         border: Border.all(
+  //           color: isSelected ? Color(0xFF3498DB) : Colors.grey[300]!,
+  //           width: isSelected ? 2 : 1,
+  //         ),
+  //       ),
+  //       child: Text(
+  //         text,
+  //         style: TextStyle(
+  //           color: isSelected ? Color(0xFF3498DB) : Colors.grey[700],
+  //           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+//   Widget _buildPagination() {
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.center,
+//       children: [
+//         _buildPaginationButton('«', _currentPage > 1, () {
+//           if (_currentPage > 1) {
+//             setState(() {
+//               _currentPage--;
+//             });
+//           }
+//         }),
+//         _buildPaginationButton('1', _currentPage != 1, () {
+//           setState(() {
+//             _currentPage = 1;
+//           });
+//         }, isActive: _currentPage == 1),
+//         _buildPaginationButton('2', _currentPage != 2, () {
+//           setState(() {
+//             _currentPage = 2;
+//           });
+//         }, isActive: _currentPage == 2),
+//         _buildPaginationButton('»', true, () {
+//           setState(() {
+//             _currentPage = 2;
+//           });
+//         }),
+//       ],
+//     );
+//   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Text(
-              label + ':',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(value, style: TextStyle(color: Colors.grey[900])),
-          ),
-        ],
-      ),
-    );
-  }
+//   Widget _buildPaginationButton(
+//     String text,
+//     bool enabled,
+//     VoidCallback onPressed, {
+//     bool isActive = false,
+//   }) {
+//     return Container(
+//       margin: EdgeInsets.symmetric(horizontal: 4),
+//       child: InkWell(
+//         onTap: enabled ? onPressed : null,
+//         child: Container(
+//           width: 40,
+//           height: 40,
+//           decoration: BoxDecoration(
+//             color: isActive ? Color(0xFF3498DB) : Colors.white,
+//             borderRadius: BorderRadius.circular(4),
+//             border: Border.all(color: Colors.grey[300]!),
+//           ),
+//           child: Center(
+//             child: Text(
+//               text,
+//               style: TextStyle(
+//                 color: isActive
+//                     ? Colors.white
+//                     : enabled
+//                         ? Colors.grey[800]
+//                         : Colors.grey[400],
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
 
-  void _showNewOrderDialog() {
-    TextEditingController customerController = TextEditingController();
-    TextEditingController servicesController = TextEditingController();
-    TextEditingController itemsController = TextEditingController();
-    TextEditingController amountController = TextEditingController();
-    String status = 'Pending';
+//   void _showOrderDetails(Order order) {
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: Text('Order Details'),
+//           content: Container(
+//             width: double.maxFinite,
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 _buildDetailRow('Order ID', order.id),
+//                 _buildDetailRow('Customer', order.customer),
+//                 _buildDetailRow('Services', order.services),
+//                 _buildDetailRow('Items', order.items.toString()),
+//                 _buildDetailRow('Order Date', order.orderDate),
+//                 _buildDetailRow('Delivery Date', order.deliveryDate),
+//                 _buildDetailRow(
+//                   'Amount',
+//                   '\$${order.amount.toStringAsFixed(2)}',
+//                 ),
+//                 _buildDetailRow('Status', order.status),
+//               ],
+//             ),
+//           ),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.pop(context);
+//               },
+//               child: Text('Close'),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 // Handle updating order status
+//                 setState(() {
+//                   // Update order status here
+//                 });
+//                 Navigator.pop(context);
+//               },
+//               child: Text('Update Status'),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('New Order'),
-          content: Container(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: customerController,
-                  decoration: InputDecoration(labelText: 'Customer Name'),
-                ),
-                TextField(
-                  controller: servicesController,
-                  decoration: InputDecoration(labelText: 'Services'),
-                ),
-                TextField(
-                  controller: itemsController,
-                  decoration: InputDecoration(labelText: 'Number of Items'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: amountController,
-                  decoration: InputDecoration(labelText: 'Amount'),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                ),
-                SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: status,
-                  decoration: InputDecoration(labelText: 'Status'),
-                  items:
-                      ['Pending', 'Process', 'Completed', 'Cancelled']
-                          .map(
-                            (status) => DropdownMenuItem(
-                              value: status,
-                              child: Text(status),
-                            ),
-                          )
-                          .toList(),
-                  onChanged: (value) {
-                    status = value!;
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Get last order ID and increment
-                String lastId = _orders.first.id;
-                int orderNumber = int.parse(lastId.split('-')[1]) + 1;
-                String newId = '#ORD-${orderNumber.toString()}';
+//   Widget _buildDetailRow(String label, String value) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8.0),
+//       child: Row(
+//         children: [
+//           Expanded(
+//             flex: 1,
+//             child: Text(
+//               label + ':',
+//               style: TextStyle(
+//                 fontWeight: FontWeight.bold,
+//                 color: Colors.grey[700],
+//               ),
+//             ),
+//           ),
+//           Expanded(
+//             flex: 2,
+//             child: Text(value, style: TextStyle(color: Colors.grey[900])),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-                // Get today's date and delivery date (1 day from now)
-                DateTime now = DateTime.now();
-                String orderDate = '${now.month} ${now.day}, ${now.year}';
-                DateTime delivery = now.add(Duration(days: 1));
-                String deliveryDate =
-                    '${delivery.month} ${delivery.day}, ${delivery.year}';
+//   void _showNewOrderDialog() {
+//     TextEditingController customerController = TextEditingController();
+//     TextEditingController servicesController = TextEditingController();
+//     TextEditingController itemsController = TextEditingController();
+//     TextEditingController amountController = TextEditingController();
+//     String status = 'Pending';
 
-                // Create new order
-                Order newOrder = Order(
-                  id: newId,
-                  customer: customerController.text,
-                  services: servicesController.text,
-                  items: int.tryParse(itemsController.text) ?? 0,
-                  orderDate: orderDate,
-                  deliveryDate: deliveryDate,
-                  amount: double.tryParse(amountController.text) ?? 0.0,
-                  status: status,
-                );
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: Text('New Order'),
+//           content: Container(
+//             width: double.maxFinite,
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 TextField(
+//                   controller: customerController,
+//                   decoration: InputDecoration(labelText: 'Customer Name'),
+//                 ),
+//                 TextField(
+//                   controller: servicesController,
+//                   decoration: InputDecoration(labelText: 'Services'),
+//                 ),
+//                 TextField(
+//                   controller: itemsController,
+//                   decoration: InputDecoration(labelText: 'Number of Items'),
+//                   keyboardType: TextInputType.number,
+//                 ),
+//                 TextField(
+//                   controller: amountController,
+//                   decoration: InputDecoration(labelText: 'Amount'),
+//                   keyboardType: TextInputType.numberWithOptions(decimal: true),
+//                 ),
+//                 SizedBox(height: 16),
+//                 DropdownButtonFormField<String>(
+//                   value: status,
+//                   decoration: InputDecoration(labelText: 'Status'),
+//                   items: ['Pending', 'Process', 'Completed', 'Cancelled']
+//                       .map(
+//                         (status) => DropdownMenuItem(
+//                           value: status,
+//                           child: Text(status),
+//                         ),
+//                       )
+//                       .toList(),
+//                   onChanged: (value) {
+//                     status = value!;
+//                   },
+//                 ),
+//               ],
+//             ),
+//           ),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.pop(context);
+//               },
+//               child: Text('Cancel'),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 // Get last order ID and increment
+//                 String lastId = _orders.first.id;
+//                 int orderNumber = int.parse(lastId.split('-')[1]) + 1;
+//                 String newId = '#ORD-${orderNumber.toString()}';
 
-                // Add to orders list
-                setState(() {
-                  _orders.insert(0, newOrder); // Add at beginning
-                });
+//                 // Get today's date and delivery date (1 day from now)
+//                 DateTime now = DateTime.now();
+//                 String orderDate = '${now.month} ${now.day}, ${now.year}';
+//                 DateTime delivery = now.add(Duration(days: 1));
+//                 String deliveryDate =
+//                     '${delivery.month} ${delivery.day}, ${delivery.year}';
 
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+//                 // Create new order
+//                 Order newOrder = Order(
+//                   id: newId,
+//                   customer: customerController.text,
+//                   services: servicesController.text,
+//                   items: int.tryParse(itemsController.text) ?? 0,
+//                   orderDate: orderDate,
+//                   deliveryDate: deliveryDate,
+//                   amount: double.tryParse(amountController.text) ?? 0.0,
+//                   status: status,
+//                 );
+
+//                 // Add to orders list
+//                 setState(() {
+//                   _orders.insert(0, newOrder); // Add at beginning
+//                 });
+
+//                 Navigator.pop(context);
+//               },
+//               child: Text('Save'),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
 }

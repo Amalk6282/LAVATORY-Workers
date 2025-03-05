@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lacatory_workers/login_page.dart';
+import 'package:lacatory_workers/features/login/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(),
-      home: LoginPage(),
+      home: LoginScreen(),
     );
   }
 }
