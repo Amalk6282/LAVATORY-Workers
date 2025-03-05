@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 class CustomImagePickerButton extends StatefulWidget {
   final String? selectedImage;
-  final Function(File file) onPick;
+  final Function(PlatformFile file) onPick;
   final bool showRequiredError;
   final double height, width, borderRadius;
 
@@ -25,27 +23,7 @@ class CustomImagePickerButton extends StatefulWidget {
 }
 
 class _CustomImagePickerButtonState extends State<CustomImagePickerButton> {
-  File? _selectedFile;
-
-  // Pick image using File Picker
-  Future<void> _pickImage() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        File pickedFile = File(result.files.first.path!);
-        setState(() {
-          _selectedFile = pickedFile;
-        });
-
-        widget.onPick(pickedFile);
-      }
-    } catch (e) {
-      debugPrint("Error picking file: $e");
-    }
-  }
+  PlatformFile? _selectedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -55,24 +33,36 @@ class _CustomImagePickerButtonState extends State<CustomImagePickerButton> {
           borderRadius: BorderRadius.circular(widget.borderRadius),
           color: Colors.grey[200],
           child: InkWell(
-            onTap: _pickImage,
+            onTap: () async {
+              FilePickerResult? result = await FilePicker.platform.pickFiles(
+                type: FileType.custom,
+                allowedExtensions: ['jpg', 'png', 'jpeg'],
+              );
+
+              if (result != null && result.files.isNotEmpty) {
+                _selectedFile = result.files.first;
+
+                setState(() {});
+                widget.onPick(result.files.first);
+              }
+            },
             borderRadius: BorderRadius.circular(widget.borderRadius),
-            child: _selectedFile != null
+            child: widget.selectedImage != null && _selectedFile == null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(widget.borderRadius),
-                    child: Image.file(
-                      _selectedFile!,
+                    child: Image.network(
+                      widget.selectedImage!,
                       height: widget.height,
                       width: widget.width,
                       fit: BoxFit.cover,
                     ),
                   )
-                : widget.selectedImage != null
+                : _selectedFile != null
                     ? ClipRRect(
                         borderRadius:
                             BorderRadius.circular(widget.borderRadius),
-                        child: Image.network(
-                          widget.selectedImage!,
+                        child: Image.memory(
+                          _selectedFile!.bytes!,
                           height: widget.height,
                           width: widget.width,
                           fit: BoxFit.cover,
