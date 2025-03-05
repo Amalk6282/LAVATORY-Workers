@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'add_edit_service.dart';
 
@@ -6,8 +7,7 @@ class LaundryService {
   String id;
   String name;
   String description;
-  double price;
-  String category;
+  int price;
   int estimatedTimeHours;
   bool isPopular;
 
@@ -16,7 +16,6 @@ class LaundryService {
     required this.name,
     required this.description,
     required this.price,
-    required this.category,
     required this.estimatedTimeHours,
     this.isPopular = false,
   });
@@ -29,66 +28,12 @@ class LaundryServicesScreen extends StatefulWidget {
 
 class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedCategory = 'All Categories';
-  List<String> _categories = [
-    'All Categories',
-    'Wash & Fold',
-    'Dry Cleaning',
-    'Ironing',
-    'Special Items',
-    'Shoe Cleaning',
-    'Carpet Cleaning',
-  ];
 
   // Sample data for laundry services
-  List<LaundryService> _services = [
-    LaundryService(
-      id: 'SRV-001',
-      name: 'Standard Wash & Fold',
-      description: 'Basic wash, dry, and fold service for everyday clothing',
-      price: 2.50,
-      category: 'Wash & Fold',
-      estimatedTimeHours: 24,
-      isPopular: true,
-    ),
-    LaundryService(
-      id: 'SRV-002',
-      name: 'Delicate Wash',
-      description: 'Gentle washing for delicate fabrics and items',
-      price: 3.75,
-      category: 'Wash & Fold',
-      estimatedTimeHours: 24,
-    ),
-    LaundryService(
-      id: 'SRV-003',
-      name: 'Suit Dry Cleaning',
-      description: 'Professional dry cleaning for suits and formal wear',
-      price: 12.99,
-      category: 'Dry Cleaning',
-      estimatedTimeHours: 48,
-      isPopular: true,
-    ),
-    LaundryService(
-      id: 'SRV-004',
-      name: 'Business Shirt Ironing',
-      description: 'Professional ironing for business shirts',
-      price: 3.50,
-      category: 'Ironing',
-      estimatedTimeHours: 24,
-    ),
-    LaundryService(
-      id: 'SRV-005',
-      name: 'Comforter Cleaning',
-      description: 'Deep cleaning for comforters and duvets',
-      price: 24.99,
-      category: 'Special Items',
-      estimatedTimeHours: 72,
-    ),
-  ];
+  List<LaundryService> _services = [];
 
   List<LaundryService> get filteredServices {
-    if (_searchController.text.isEmpty &&
-        _selectedCategory == 'All Categories') {
+    if (_searchController.text.isEmpty) {
       return _services;
     }
 
@@ -101,11 +46,38 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                 _searchController.text.toLowerCase(),
               );
 
-      bool matchesCategory = _selectedCategory == 'All Categories' ||
-          service.category == _selectedCategory;
-
-      return matchesSearch && matchesCategory;
+      return matchesSearch;
     }).toList();
+  }
+
+  @override
+  void initState() {
+    Supabase.instance.client
+        .from('laundry_services')
+        .select('*')
+        .then((response) {
+      final data = response;
+      final services = data.map((e) {
+        return LaundryService(
+          id: e['id'].toString(),
+          name: e['name'].toString(),
+          description: e['description'].toString(),
+          price: e['price'],
+          estimatedTimeHours: e['hours'],
+          isPopular: false,
+        );
+      }).toList();
+
+      setState(() {
+        _services = services;
+      });
+    }).onError((e, s) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error fetching services: ${e!.toString()}")));
+    });
+
+    ;
+    super.initState();
   }
 
   @override
@@ -204,36 +176,36 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
             ),
           ),
         ),
-        SizedBox(width: 16),
-        Expanded(
-          flex: 2,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedCategory,
-                isExpanded: true,
-                hint: Text('Category'),
-                items: _categories.map((category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-        ),
+        // SizedBox(width: 16),
+        // Expanded(
+        //   flex: 2,
+        //   child: Container(
+        //     padding: EdgeInsets.symmetric(horizontal: 16),
+        //     decoration: BoxDecoration(
+        //       color: Colors.white,
+        //       borderRadius: BorderRadius.circular(8),
+        //       border: Border.all(color: Colors.grey[300]!),
+        //     ),
+        //     child: DropdownButtonHideUnderline(
+        //       child: DropdownButton<String>(
+        //         value: _selectedCategory,
+        //         isExpanded: true,
+        //         hint: Text('Category'),
+        //         items: _categories.map((category) {
+        //           return DropdownMenuItem<String>(
+        //             value: category,
+        //             child: Text(category),
+        //           );
+        //         }).toList(),
+        //         onChanged: (value) {
+        //           setState(() {
+        //             _selectedCategory = value!;
+        //           });
+        //         },
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
@@ -300,8 +272,8 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
             SizedBox(height: 16),
             Row(
               children: [
-                _buildInfoChip(icon: Icons.category, label: service.category),
-                SizedBox(width: 12),
+                // _buildInfoChip(icon: Icons.category, label: service.category),
+                // SizedBox(width: 12),
                 _buildInfoChip(
                   icon: Icons.access_time,
                   label: '${service.estimatedTimeHours} hours',
@@ -398,7 +370,7 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
       text: isEditing ? service.estimatedTimeHours.toString() : '',
     );
 
-    String selectedCategory = isEditing ? service.category : 'Wash & Fold';
+    // String selectedCategory = isEditing ? service.category : 'Wash & Fold';
     bool isPopular = isEditing ? service.isPopular : false;
 
     showDialog(
@@ -460,28 +432,28 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: selectedCategory,
-                      decoration: InputDecoration(
-                        labelText: 'Category',
-                        border: OutlineInputBorder(),
-                      ),
-                      items:
-                          _categories.where((c) => c != 'All Categories').map((
-                        category,
-                      ) {
-                        return DropdownMenuItem<String>(
-                          value: category,
-                          child: Text(category),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategory = value!;
-                        });
-                      },
-                    ),
+                    // SizedBox(height: 16),
+                    // DropdownButtonFormField<String>(
+                    //   value: selectedCategory,
+                    //   decoration: InputDecoration(
+                    //     labelText: 'Category',
+                    //     border: OutlineInputBorder(),
+                    //   ),
+                    //   items:
+                    //       _categories.where((c) => c != 'All Categories').map((
+                    //     category,
+                    //   ) {
+                    //     return DropdownMenuItem<String>(
+                    //       value: category,
+                    //       child: Text(category),
+                    //     );
+                    //   }).toList(),
+                    //   onChanged: (value) {
+                    //     setState(() {
+                    //       selectedCategory = value!;
+                    //     });
+                    //   },
+                    // ),
                     SizedBox(height: 16),
                     Row(
                       children: [
@@ -522,8 +494,7 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                     }
 
                     // Parse inputs
-                    final double price =
-                        double.tryParse(priceController.text) ?? 0.0;
+                    final int price = int.tryParse(priceController.text) ?? 0;
                     final int hours = int.tryParse(hoursController.text) ?? 24;
 
                     if (isEditing) {
@@ -532,7 +503,7 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                         service.name = nameController.text;
                         service.description = descriptionController.text;
                         service.price = price;
-                        service.category = selectedCategory;
+                        // service.category = selectedCategory;
                         service.estimatedTimeHours = hours;
                         service.isPopular = isPopular;
                       });
@@ -543,7 +514,7 @@ class _LaundryServicesScreenState extends State<LaundryServicesScreen> {
                         name: nameController.text,
                         description: descriptionController.text,
                         price: price,
-                        category: selectedCategory,
+                        // category: selectedCategory,
                         estimatedTimeHours: hours,
                         isPopular: isPopular,
                       );
